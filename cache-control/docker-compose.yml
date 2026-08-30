@@ -1,0 +1,27 @@
+# Bring up the origin (Node) + a Varnish in front, so you can SEE the shared cache
+# obey s-maxage. The origin is not exposed; you hit Varnish (port 8081).
+#
+#   docker compose up
+#   ./demo.sh http://localhost:8081     # repeat and watch X-Cache: HIT and Age climb
+#
+# Compare: on /mixed Varnish holds 7200s (s-maxage); a browser would use 3600s (max-age).
+
+services:
+  origin:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./server.js:/app/server.js:ro
+    command: node server.js
+    expose:
+      - "8080"
+
+  varnish:
+    image: varnish:7.5
+    depends_on:
+      - origin
+    volumes:
+      - ./default.vcl:/etc/varnish/default.vcl:ro
+    ports:
+      - "8081:80"
+    command: ["varnishd", "-F", "-f", "/etc/varnish/default.vcl", "-a", ":80"]
