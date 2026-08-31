@@ -13,18 +13,18 @@ import sys
 
 def make_db():
     con = sqlite3.connect(":memory:")
-    con.execute("CREATE TABLE usuarios (id INTEGER PRIMARY KEY, usuario TEXT, senha TEXT)")
+    con.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, password TEXT)")
     con.executemany(
-        "INSERT INTO usuarios (usuario, senha) VALUES (?, ?)",
-        [("admin", "s3nh4-do-admin"), ("alice", "secret")],
+        "INSERT INTO users (username, password) VALUES (?, ?)",
+        [("admin", "s3cr3t-admin-pw"), ("alice", "secret")],
     )
     con.commit()
     return con
 
 
-def login(con, usuario, senha):
+def login(con, username, password):
     # THE BUG: user input goes straight into the query string.
-    sql = "SELECT id, usuario FROM usuarios WHERE usuario = '%s' AND senha = '%s'" % (usuario, senha)
+    sql = "SELECT id, username FROM users WHERE username = '%s' AND password = '%s'" % (username, password)
     print("  query:", sql)
     try:
         return con.execute(sql).fetchone()
@@ -39,7 +39,7 @@ def main():
         sys.exit(2)
     row = login(make_db(), sys.argv[1], sys.argv[2])
     if row:
-        print("  LOGGED IN as id=%s usuario=%s" % (row[0], row[1]))
+        print("  LOGGED IN as id=%s username=%s" % (row[0], row[1]))
     else:
         print("  login rejected")
 

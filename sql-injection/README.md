@@ -49,7 +49,7 @@ php php/safe_login.php       "' OR 1=1 --" ""
 The vulnerable login builds this query:
 
 ```sql
-SELECT id, usuario FROM usuarios WHERE usuario = '' OR 1=1 --' AND senha = ''
+SELECT id, username FROM users WHERE username = '' OR 1=1 --' AND password = ''
 ```
 
 The `OR 1=1` makes the `WHERE` true for every row and the `--` comments out the
@@ -57,7 +57,7 @@ password check. It returns the whole table and logs you in as the first row, the
 admin. Try `admin' --` too: it comments out the password check and logs you in as
 that specific user.
 
-The safe login runs `... WHERE usuario = ? AND senha = ?` and binds your input as
+The safe login runs `... WHERE username = ? AND password = ?` and binds your input as
 data. It looks for a user literally named `' OR 1=1 --`, finds nobody, and rejects
 the login. Feed it a real password and it works; feed it a payload and it does not.
 
